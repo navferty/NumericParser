@@ -5,7 +5,15 @@ namespace NumericParser;
 
 internal static partial class Regexes
 {
-#if NET
+#if NETSTANDARD2_1
+	public static Regex SpacesPattern() => _spacesPattern.Value;
+	public static Regex DecimalPattern() => _decimalPattern.Value;
+	public static Regex ExponentPattern() => _exponentPattern.Value;
+
+	private static readonly Lazy<Regex> _spacesPattern = new(() => new Regex(@"\s"));
+	private static readonly Lazy<Regex> _decimalPattern = new(() => new Regex(@"[\d\.\,\s]*"));
+	private static readonly Lazy<Regex> _exponentPattern = new(() => new Regex(@"[-+]?\d*\.?\d+[eE][-+]?\d+"));
+#else
 	[GeneratedRegex(@"\s", RegexOptions.IgnoreCase, "en-US")]
 	public static partial Regex SpacesPattern();
 
@@ -14,14 +22,6 @@ internal static partial class Regexes
 
 	[GeneratedRegex(@"[-+]?\d*\.?\d+[eE][-+]?\d+", RegexOptions.IgnoreCase, "en-US")]
 	public static partial Regex ExponentPattern();
-#else
-	public static Regex SpacesPattern() => _spacesPattern.Value;
-	public static Regex DecimalPattern() => _decimalPattern.Value;
-	public static Regex ExponentPattern() => _exponentPattern.Value;
-
-	private static readonly Lazy<Regex> _spacesPattern = new(() => new Regex(@"\s"));
-	private static readonly Lazy<Regex> _decimalPattern = new(() => new Regex(@"[\d\.\,\s]*"));
-	private static readonly Lazy<Regex> _exponentPattern = new(() => new Regex(@"[-+]?\d*\.?\d+[eE][-+]?\d+"));
 #endif
 }
 
@@ -37,14 +37,27 @@ internal static class DecimalParserImpl
 			return null;
 		}
 
-		var v = Regexes.SpacesPattern().Replace(value, match => string.Empty);
-
-		if (Regexes.ExponentPattern().IsMatch(v))
+		if (Regexes.ExponentPattern().IsMatch(value))
 		{
-			return v.TryParseExponent();
+			return value.AsSpan().TryParseExponent();
 		}
 
-		if (!Regexes.DecimalPattern().IsMatch(value))
+		Span<char> v = stackalloc char[value.Length];
+		var j = 0;
+		for (int i = 0; i < value.Length; i++)
+		{
+			var c = value[i];
+			if (!char.IsWhiteSpace(c))
+				v[j++] = c;
+		}
+
+		v = v[..j];
+
+#if NETSTANDARD2_1
+		if (!Regexes.DecimalPattern().IsMatch(v.ToString()))
+#else
+		if (!Regexes.DecimalPattern().IsMatch(v))
+#endif
 		{
 			return null;
 		}
@@ -53,21 +66,21 @@ internal static class DecimalParserImpl
 		{
 			var last = v.LastIndexOfAny([',', '.']);
 			var c = v[last];
-			return v.CountChars(c) == 1
+			return v.Count(c) == 1
 				? v.TryParse(c == '.' ? Format.Dot : Format.Comma)
 				: null;
 		}
 
 		if (v.Contains(','))
 		{
-			return v.CountChars(',') == 1
+			return v.Count(',') == 1
 				? v.TryParse(Format.Comma)
 				: v.TryParse(Format.Dot);
 		}
 
 		if (v.Contains('.'))
 		{
-			return v.CountChars('.') == 1
+			return v.Count('.') == 1
 				? v.TryParse(Format.Dot)
 				: v.TryParse(Format.Comma);
 		}
@@ -75,19 +88,32 @@ internal static class DecimalParserImpl
 		return v.TryParse(Format.Dot);
 	}
 
-	private static int CountChars(this string value, char c)
+#if NETSTANDARD2_1
+	private static bool Contains(this Span<char> value, char c)
 	{
-		return value.Count(x => x == c);
+		return value.IndexOf(c) != -1;
 	}
 
-	private static decimal? TryParseExponent(this string value)
+	private static int Count(this Span<char> value, char c)
+	{
+		var counter = 0;
+		foreach (var v in value)
+		{
+			if (v == c)
+				counter++;
+		}
+		return counter;
+	}
+#endif
+
+	private static decimal? TryParseExponent(this ReadOnlySpan<char> value)
 	{
 		return decimal.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out decimal result)
 			? result
 			: null;
 	}
 
-	private static decimal? TryParse(this string value, Format info)
+	private static decimal? TryParse(this Span<char> value, Format info)
 	{
 		var formatInfo = info == Format.Comma
 			? CommaFormatInfo.Value
