@@ -2,101 +2,100 @@
 using System.Globalization;
 using System.Text.RegularExpressions;
 
-namespace NumericParser
+namespace NumericParser;
+
+public static class DecimalParser
 {
-	public static class DecimalParser
+	// TODO use code-generated regex
+	private static readonly Regex SpacesPattern = new Regex(@"\s");
+	private static readonly Regex DecimalPattern = new Regex(@"[\d\.\,\s]*");
+	private static readonly Regex ExponentPattern = new Regex(@"[-+]?\d*\.?\d+[eE][-+]?\d+");
+
+	public static decimal? ParseDecimal(this string value)
 	{
-		private static readonly Regex SpacesPattern = new Regex(@"\s");
-		private static readonly Regex DecimalPattern = new Regex(@"[\d\.\,\s]*");
-		private static readonly Regex ExponentPattern = new Regex(@"[-+]?\d*\.?\d+[eE][-+]?\d+");
-
-		public static decimal? ParseDecimal(this string value)
+		if (string.IsNullOrWhiteSpace(value))
 		{
-			if (string.IsNullOrWhiteSpace(value))
-			{
-				return null;
-			}
-
-			var v = SpacesPattern.Replace(value, match => string.Empty);
-
-			if (ExponentPattern.IsMatch(v))
-			{
-				return v.TryParseExponent();
-			}
-
-			if (!DecimalPattern.IsMatch(value))
-			{
-				return null;
-			}
-
-			if (v.Contains(",") && v.Contains("."))
-			{
-				var last = v.LastIndexOfAny(new[] { ',', '.' });
-				var c = v[last];
-				return v.CountChars(c) == 1
-					? v.TryParse(c == '.' ? Format.Dot : Format.Comma)
-					: null;
-			}
-
-			if (v.Contains(","))
-			{
-				return v.CountChars(',') == 1
-					? v.TryParse(Format.Comma)
-					: v.TryParse(Format.Dot);
-			}
-
-			if (v.Contains("."))
-			{
-				return v.CountChars('.') == 1
-					? v.TryParse(Format.Dot)
-					: v.TryParse(Format.Comma);
-			}
-
-			return v.TryParse(Format.Dot);
+			return null;
 		}
 
-		private static int CountChars(this string value, char c)
+		var v = SpacesPattern.Replace(value, match => string.Empty);
+
+		if (ExponentPattern.IsMatch(v))
 		{
-			return value.Count(x => x == c);
+			return v.TryParseExponent();
 		}
 
-		private static decimal? TryParseExponent(this string value)
+		if (!DecimalPattern.IsMatch(value))
 		{
-			decimal result;
-			return decimal.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out result)
-				? result
-				: (decimal?)null;
+			return null;
 		}
 
-		private static decimal? TryParse(this string value, Format info)
+		if (v.Contains(",") && v.Contains("."))
 		{
-			decimal result;
-			var formatInfo = (NumberFormatInfo)NumberFormatInfo.InvariantInfo.Clone();
-
-			if (info == Format.Comma)
-			{
-				formatInfo.CurrencyDecimalSeparator = ",";
-				formatInfo.CurrencyGroupSeparator = ".";
-				formatInfo.NumberDecimalSeparator = ",";
-				formatInfo.NumberGroupSeparator = ".";
-			}
-			else
-			{
-				formatInfo.CurrencyDecimalSeparator = ".";
-				formatInfo.CurrencyGroupSeparator = ",";
-			}
-			// добавить тест-кейсов на формат валют
-			//formatInfo.CurrencyNegativePattern = 8;
-			//formatInfo.CurrencyPositivePattern = 3;
-			return decimal.TryParse(value, NumberStyles.Currency, formatInfo, out result)
-				? result
-				: (decimal?)null;
+			var last = v.LastIndexOfAny(new[] { ',', '.' });
+			var c = v[last];
+			return v.CountChars(c) == 1
+				? v.TryParse(c == '.' ? Format.Dot : Format.Comma)
+				: null;
 		}
 
-		private enum Format
+		if (v.Contains(","))
 		{
-			Dot,
-			Comma
+			return v.CountChars(',') == 1
+				? v.TryParse(Format.Comma)
+				: v.TryParse(Format.Dot);
 		}
+
+		if (v.Contains("."))
+		{
+			return v.CountChars('.') == 1
+				? v.TryParse(Format.Dot)
+				: v.TryParse(Format.Comma);
+		}
+
+		return v.TryParse(Format.Dot);
+	}
+
+	private static int CountChars(this string value, char c)
+	{
+		return value.Count(x => x == c);
+	}
+
+	private static decimal? TryParseExponent(this string value)
+	{
+		decimal result;
+		return decimal.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out result)
+			? result
+			: (decimal?)null;
+	}
+
+	private static decimal? TryParse(this string value, Format info)
+	{
+		var formatInfo = (NumberFormatInfo)NumberFormatInfo.InvariantInfo.Clone();
+
+		if (info == Format.Comma)
+		{
+			formatInfo.CurrencyDecimalSeparator = ",";
+			formatInfo.CurrencyGroupSeparator = ".";
+			formatInfo.NumberDecimalSeparator = ",";
+			formatInfo.NumberGroupSeparator = ".";
+		}
+		else
+		{
+			formatInfo.CurrencyDecimalSeparator = ".";
+			formatInfo.CurrencyGroupSeparator = ",";
+		}
+		// добавить тест-кейсов на формат валют
+		//formatInfo.CurrencyNegativePattern = 8;
+		//formatInfo.CurrencyPositivePattern = 3;
+		return decimal.TryParse(value, NumberStyles.Currency, formatInfo, out decimal result)
+			? result
+			: (decimal?)null;
+	}
+
+	private enum Format
+	{
+		Dot,
+		Comma
 	}
 }
