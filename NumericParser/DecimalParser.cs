@@ -10,7 +10,7 @@ public static class DecimalParser
 	/// <param name="value">Input string.</param>
 	/// <param name="parsed">Decimal value.</param>
 	/// <returns>True if parsing was successfull, otherwise false.</returns>
-	public static bool TryParseDecimal(this string value, [NotNullWhen(true)]out decimal? parsed)
+	public static bool TryParseDecimal(this string? value, [NotNullWhen(true)]out decimal? parsed)
 	{
 		var result = DecimalParserImpl.ParseDecimal(value);
 		if (result.HasValue)
@@ -24,12 +24,12 @@ public static class DecimalParser
 	}
 
 	/// <summary>
-	/// Parse input string as decimal.
+	/// Parse input string as decimal or throw <see cref="ArgumentException"/> if value could not be parsed.
 	/// </summary>
 	/// <param name="value">Input string.</param>
 	/// <returns>Decimal value.</returns>
 	/// <exception cref="ArgumentException">Throws if value can not be parsed to decimal.</exception>
-	public static decimal ParseDecimal(this string value)
+	public static decimal ParseDecimal(this string? value)
 	{
 		return DecimalParserImpl.ParseDecimal(value)
 			?? throw new ArgumentException("Failed to parse value to decimal");
