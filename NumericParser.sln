@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NumericParser", "NumericPar
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NumericParserTests", "NumericParserTests\NumericParserTests.csproj", "{F4DBF3A5-32A2-42B6-94F8-0AD1797B2210}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NumericParser.Benchmarks", "NumericParser.Benchmarks\NumericParser.Benchmarks.csproj", "{BC584333-55DB-4752-AFC9-07EB44EE23FC}"
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{7A6BD713-20C3-41B3-96E9-0FE4F48EDE48}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
@@ -26,6 +28,10 @@ Global
 		{F4DBF3A5-32A2-42B6-94F8-0AD1797B2210}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F4DBF3A5-32A2-42B6-94F8-0AD1797B2210}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F4DBF3A5-32A2-42B6-94F8-0AD1797B2210}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BC584333-55DB-4752-AFC9-07EB44EE23FC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BC584333-55DB-4752-AFC9-07EB44EE23FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BC584333-55DB-4752-AFC9-07EB44EE23FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BC584333-55DB-4752-AFC9-07EB44EE23FC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
