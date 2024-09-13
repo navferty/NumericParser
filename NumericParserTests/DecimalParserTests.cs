@@ -7,31 +7,34 @@ public class NumericParserTests
 {
 	[Theory]
 	[MemberData(nameof(GetData))]
-	public void ParseDecimal(string sourceValue, decimal? targetValue)
+	public void ParseDecimal(string sourceValue, bool parsed, decimal? targetValue)
 	{
-		Assert.Equal(targetValue, sourceValue.ParseDecimal());
+		var parsedActual = sourceValue.TryParseDecimal(out var result);
+
+		Assert.Equal(parsed, parsedActual);
+		Assert.Equal(targetValue, result);
 	}
 
-	public static TheoryData<string, decimal?> GetData()
+	public static TheoryData<string, bool, decimal?> GetData()
 	{
-		return new TheoryData<string, decimal?>
+		return new TheoryData<string, bool, decimal?>
 		{
-			{ "0", 0m },
-			{ "123", 123m },
-			{ "1.1", 1.1m },
-			{ "1,1", 1.1m },
-			{ "1 000", 1000m },
-			{ "12  00 00 . 12", 120000.12m },
-			{ "0.1", 0.1m },
-			{ ".123", 0.123m },
-			{ "10.000.000", 10000000m },
-			{ "10.000,12", 10000.12m },
-			{ "12,345.12", 12345.12m },
-			{ "12,345,000", 12345000m },
-			{ "1E6", 1000000m },
-			{ "1.2E3", 1200m },
-			{ "-1.3E-5", -0.000013m },
-			{ "no value", null },
+			{ "0", true, 0m },
+			{ "123", true, 123m },
+			{ "1.1", true, 1.1m },
+			{ "1,1", true, 1.1m },
+			{ "1 000", true, 1000m },
+			{ "12  00 00 . 12", true, 120000.12m },
+			{ "0.1", true, 0.1m },
+			{ ".123", true, 0.123m },
+			{ "10.000.000", true, 10000000m },
+			{ "10.000,12", true, 10000.12m },
+			{ "12,345.12", true, 12345.12m },
+			{ "12,345,000", true, 12345000m },
+			{ "1E6", true, 1000000m },
+			{ "1.2E3", true, 1200m },
+			{ "-1.3E-5", true, -0.000013m },
+			{ "no value", false, null },
 		};
 	}
 }
