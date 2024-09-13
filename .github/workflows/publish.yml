@@ -1,0 +1,15 @@
+name: publish to nuget
+on:
+  push:
+    branches:
+      - master
+jobs:
+  publish:
+    name: build, pack & publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Pack Nuget
+        run: dotnet pack -c Release -o . NumericParser/NumericParser.csproj
+      - name: Publish NuGet
+        run: dotnet nuget push *.nupkg -k ${{ secrets.NUGET_ORG_PUSH_TOKEN }} -s https://api.nuget.org/v3/index.json
