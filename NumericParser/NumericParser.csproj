@@ -9,9 +9,9 @@
     <PackageId>NumericParser</PackageId>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>readme.md</PackageReadmeFile>
-    <Version>0.9.0</Version>
+    <Version>0.9.1</Version>
     <Authors>navferty</Authors>
-    <PackageDescription>Flexibility parser for decimal values from string.</PackageDescription>
+    <PackageDescription>Flexible parser for decimal values from string.</PackageDescription>
     <RepositoryUrl>https://github.com/navferty/NumericParser</RepositoryUrl>
   </PropertyGroup>
 
