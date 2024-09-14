@@ -9,83 +9,58 @@ internal static class DecimalParserImpl
 
 	public static decimal? ParseDecimal(this string? input)
 	{
-		if (string.IsNullOrWhiteSpace(input))
+		if (string.IsNullOrEmpty(input) || input.Length > DecimalParser.MaximumInputLength)
 		{
 			return null;
 		}
 
 		Span<char> value = stackalloc char[input.Length];
-		var j = 0;
-		for (int i = 0; i < input.Length; i++)
-		{
-			var c = input[i];
-			if (!char.IsWhiteSpace(c))
-				value[j++] = c;
-		}
-
-		value = value[..j];
-
-#if NETSTANDARD2_1
-		if (!Regexes.DecimalPattern().IsMatch(value.ToString()))
-#else
-		if (!Regexes.DecimalPattern().IsMatch(value))
-#endif
+		var copyResult = InputReader.CopyWithoutSpaces(input, value);
+		if (copyResult.BytesWritten == -1)
 		{
 			return null;
 		}
 
-#if NETSTANDARD2_1
-		if (Regexes.ExponentPattern().IsMatch(value.ToString()))
-#else
-		if (Regexes.ExponentPattern().IsMatch(value))
-#endif
+		value = value[..copyResult.BytesWritten];
+
+		if (copyResult.IsExponent)
 		{
 			return value.TryParseExponent();
 		}
 
-		if (value.Contains(',') && value.Contains('.'))
+		if (copyResult.CommasCount > 0 && copyResult.DotsCount > 0)
 		{
-			var last = value.LastIndexOfAny([',', '.']);
-			var c = value[last];
-			return value.Count(c) == 1
-				? value.TryParse(c == '.' ? Format.Dot : Format.Comma)
-				: null;
+			var lastSeparator = copyResult.LastSeparator;
+
+			if (lastSeparator == '.' && copyResult.DotsCount == 1)
+			{
+				return value.TryParse(Format.Dot);
+			}
+
+			if (lastSeparator == ',' && copyResult.CommasCount == 1)
+			{
+				return value.TryParse(Format.Comma);
+			}
+
+			return null;
 		}
 
-		if (value.Contains(','))
+		if (copyResult.CommasCount > 0)
 		{
-			return value.Count(',') == 1
+			return copyResult.CommasCount == 1
 				? value.TryParse(Format.Comma)
 				: value.TryParse(Format.Dot);
 		}
 
-		if (value.Contains('.'))
+		if (copyResult.DotsCount > 0)
 		{
-			return value.Count('.') == 1
+			return copyResult.DotsCount == 1
 				? value.TryParse(Format.Dot)
 				: value.TryParse(Format.Comma);
 		}
 
 		return value.TryParse(Format.Dot);
 	}
-
-#if NETSTANDARD2_1
-	private static bool Contains(this Span<char> value, char c)
-	{
-		return value.IndexOf(c) != -1;
-	}
-
-	private static int Count(this Span<char> value, char c)
-	{
-		var counter = 0;
-		foreach (var v in value)
-		{
-			if (v == c)
-				counter++;
-		}
-		return counter;
-	}
-#endif
 
 	private static decimal? TryParseExponent(this Span<char> value)
 	{
@@ -130,7 +105,14 @@ internal static class DecimalParserImpl
 
 	private enum Format
 	{
+		/// <summary>
+		/// Decimal separator is dot.
+		/// </summary>
 		Dot,
+
+		/// <summary>
+		/// Decimal separator is comma.
+		/// </summary>
 		Comma
 	}
 }

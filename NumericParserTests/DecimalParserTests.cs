@@ -32,9 +32,14 @@ public class NumericParserTests
 			{ "12,345.12", true, 12345.12m },
 			{ "12,345,000", true, 12345000m },
 			{ "1E6", true, 1000000m },
+			{ "1E-7", true, .0000001m },
 			{ "1.2E3", true, 1200m },
 			{ "-1.3E-5", true, -0.000013m },
 			{ "no value", false, null },
+			{ "00000011111111222222222X", false, null },
+			{ new string('a', 10_000), false, null },
+			{ new string('1', 10_000), false, null }, // too big value
+			{ "冬卉", false, null }, // 4-byte symbols
 		};
 	}
 }
