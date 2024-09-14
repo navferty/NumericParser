@@ -67,16 +67,32 @@ Intel Core i7-10750H CPU 2.60GHz, 1 CPU, 12 logical and 6 physical cores
 
 Job=ShortRun  IterationCount=3  LaunchCount=1
 WarmupCount=3
+```
 
-| Method          | Mean     | Error     | StdDev    | Allocated |
-|---------------- |---------:|----------:|----------:|----------:|
-| ParseDecimal    | 3.593 us | 0.6370 us | 0.0349 us |         - |
-| TryParseDecimal | 3.512 us | 0.2880 us | 0.0158 us |         - |
+| Method           | Input                | Mean          | Error         | StdDev       | Allocated     |
+|----------------- |--------------------- |--------------:|--------------:|-------------:|--------------:|
+| **ParseDecimal** | **-1 000 000 . 321** | **107.32 ns** | **42.899 ns** | **2.351 ns** |         **-** |
+| **ParseDecimal** | **-5.371E8**         |  **65.59 ns** |  **6.806 ns** | **0.373 ns** |         **-** |
+| **ParseDecimal** | **.123456789**       |  **91.14 ns** |  **5.553 ns** | **0.304 ns** |         **-** |
+| **ParseDecimal** | **1**                |  **52.02 ns** | **11.685 ns** | **0.640 ns** |         **-** |
+| **ParseDecimal** | **11**               |  **58.21 ns** | **21.371 ns** | **1.171 ns** |         **-** |
+| **ParseDecimal** | **111**              |  **63.55 ns** | **17.702 ns** | **0.970 ns** |         **-** |
+| **ParseDecimal** | **1111**             |  **64.94 ns** |  **8.368 ns** | **0.459 ns** |         **-** |
+| **ParseDecimal** | **11111**            |  **77.82 ns** | **59.420 ns** | **3.257 ns** |         **-** |
+| **ParseDecimal** | **12,345,678.91**    | **124.54 ns** | **16.657 ns** | **0.913 ns** |         **-** |
+| **ParseDecimal** | **12,91**            |  **66.78 ns** | **21.243 ns** | **1.164 ns** |         **-** |
+| **ParseDecimal** | **12.345.678,91**    | **118.17 ns** | **23.138 ns** | **1.268 ns** |         **-** |
+| **ParseDecimal** | **123.456.789**      | **124.79 ns** | **16.812 ns** | **0.922 ns** |         **-** |
+| **ParseDecimal** | **1234567.89**       |  **92.64 ns** | **80.358 ns** | **4.405 ns** |         **-** |
+| **ParseDecimal** | **15E3**             |  **49.84 ns** |  **8.490 ns** | **0.465 ns** |         **-** |
+| **ParseDecimal** | **34.56**            |  **66.46 ns** |  **8.327 ns** | **0.456 ns** |         **-** |
 
+```
 * Legends *
+Input     : Value of the 'Input' parameter
 Mean      : Arithmetic mean of all measurements
 Error     : Half of 99.9% confidence interval
 StdDev    : Standard deviation of all measurements
 Allocated : Allocated memory per single operation (managed only, inclusive, 1KB = 1024B)
-1 us      : 1 Microsecond (0.000001 sec)
+1 ns      : 1 Nanosecond (0.000000001 sec)
 ```
