@@ -70,7 +70,7 @@ WarmupCount=3
 ```
 
 | Method           | Input                | Mean          | Error         | StdDev       | Allocated     |
-|----------------- |--------------------- |--------------:|--------------:|-------------:|--------------:|
+|----------------- |---------------------:|--------------:|--------------:|-------------:|--------------:|
 | **ParseDecimal** | **-1 000 000 . 321** | **107.32 ns** | **42.899 ns** | **2.351 ns** |         **-** |
 | **ParseDecimal** | **-5.371E8**         |  **65.59 ns** |  **6.806 ns** | **0.373 ns** |         **-** |
 | **ParseDecimal** | **.123456789**       |  **91.14 ns** |  **5.553 ns** | **0.304 ns** |         **-** |
@@ -96,3 +96,36 @@ StdDev    : Standard deviation of all measurements
 Allocated : Allocated memory per single operation (managed only, inclusive, 1KB = 1024B)
 1 ns      : 1 Nanosecond (0.000000001 sec)
 ```
+<details>
+<summary>Benchmark results for .NET Framework 4.8.1</summary>
+
+```
+BenchmarkDotNet v0.14.0, Windows 10 (10.0.19045.4780/22H2/2022Update)
+Intel Core i7-10750H CPU 2.60GHz, 1 CPU, 12 logical and 6 physical cores
+  [Host]   : .NET Framework 4.8.1 (4.8.9261.0), X64 RyuJIT VectorSize=256
+  ShortRun : .NET Framework 4.8.1 (4.8.9261.0), X64 RyuJIT VectorSize=256
+
+Job=ShortRun  IterationCount=3  LaunchCount=1
+WarmupCount=3  
+```
+
+
+| Method           | Input                | Mean         | Error         | StdDev       | Gen0       | Allocated     |
+|----------------- |---------------------:|-------------:|--------------:|-------------:|-----------:|--------------:|
+| **ParseDecimal** | **.123456789**       | **278.2 ns** | **189.01 ns** | **10.36 ns** | **0.0076** |      **48 B** |
+| **ParseDecimal** | **1**                | **138.3 ns** |  **16.14 ns** |  **0.88 ns** | **0.0050** |      **32 B** |
+| **ParseDecimal** | **-1 000 000 . 321** | **299.3 ns** |  **84.53 ns** |  **4.63 ns** | **0.0086** |      **56 B** |
+| **ParseDecimal** | **11**               | **158.4 ns** |  **29.84 ns** |  **1.64 ns** | **0.0050** |      **32 B** |
+| **ParseDecimal** | **111**              | **176.3 ns** |  **41.96 ns** |  **2.30 ns** | **0.0050** |      **32 B** |
+| **ParseDecimal** | **1111**             | **193.2 ns** | **233.79 ns** | **12.81 ns** | **0.0062** |      **40 B** |
+| **ParseDecimal** | **11111**            | **201.6 ns** |   **7.37 ns** |  **0.40 ns** | **0.0062** |      **40 B** |
+| **ParseDecimal** | **12,345,678.91**    | **307.9 ns** |  **18.87 ns** |  **1.03 ns** | **0.0086** |      **56 B** |
+| **ParseDecimal** | **12,91**            | **184.8 ns** |  **30.70 ns** |  **1.68 ns** | **0.0062** |      **40 B** |
+| **ParseDecimal** | **12.345.678,91**    | **316.2 ns** | **179.95 ns** |  **9.86 ns** | **0.0086** |      **56 B** |
+| **ParseDecimal** | **123.456.789**      | **299.4 ns** | **112.65 ns** |  **6.17 ns** | **0.0076** |      **48 B** |
+| **ParseDecimal** | **1234567.89**       | **271.8 ns** |  **62.42 ns** |  **3.42 ns** | **0.0076** |      **48 B** |
+| **ParseDecimal** | **15E3**             | **159.0 ns** |  **43.79 ns** |  **2.40 ns** | **0.0062** |      **40 B** |
+| **ParseDecimal** | **34.56**            | **185.0 ns** |  **44.06 ns** |  **2.42 ns** | **0.0062** |      **40 B** |
+| **ParseDecimal** | **-5.371E8**         | **213.0 ns** |  **11.08 ns** |  **0.61 ns** | **0.0076** |      **48 B** |
+
+</details>

@@ -12,7 +12,11 @@ public static class DecimalParser
 	/// <param name="value">Input string. Maximum lenght is 1000 symbols.</param>
 	/// <param name="parsed">Decimal value.</param>
 	/// <returns>True if parsing was successfull, otherwise false.</returns>
+#if NETSTANDARD2_0
+	public static bool TryParseDecimal(this string? value, out decimal? parsed)
+#else
 	public static bool TryParseDecimal(this string? value, [NotNullWhen(true)]out decimal? parsed)
+#endif
 	{
 		var result = DecimalParserImpl.ParseDecimal(value);
 		if (result.HasValue)

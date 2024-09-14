@@ -9,7 +9,7 @@ internal static class DecimalParserImpl
 
 	public static decimal? ParseDecimal(this string? input)
 	{
-		if (string.IsNullOrEmpty(input) || input.Length > DecimalParser.MaximumInputLength)
+		if (string.IsNullOrEmpty(input) || input!.Length > DecimalParser.MaximumInputLength)
 		{
 			return null;
 		}
@@ -21,7 +21,7 @@ internal static class DecimalParserImpl
 			return null;
 		}
 
-		value = value[..copyResult.BytesWritten];
+		value = value.Slice(0, copyResult.BytesWritten);
 
 		if (copyResult.IsExponent)
 		{
@@ -64,13 +64,23 @@ internal static class DecimalParserImpl
 
 	private static decimal? TryParseExponent(this Span<char> value)
 	{
-		return decimal.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out decimal result)
+#if NETSTANDARD2_0
+		var valueToBeParsed = value.ToString();
+#else
+		var valueToBeParsed = value;
+#endif
+		return decimal.TryParse(valueToBeParsed, NumberStyles.Float, CultureInfo.InvariantCulture, out decimal result)
 			? result
 			: null;
 	}
 
 	private static decimal? TryParse(this Span<char> value, Format info)
 	{
+#if NETSTANDARD2_0
+		var valueToBeParsed = value.ToString();
+#else
+		var valueToBeParsed = value;
+#endif
 		var formatInfo = info == Format.Comma
 			? CommaFormatInfo.Value
 			: DotFormatInfo.Value;
@@ -78,7 +88,7 @@ internal static class DecimalParserImpl
 		// TODO add test-cases for currencies formats
 		//formatInfo.CurrencyNegativePattern = 8;
 		//formatInfo.CurrencyPositivePattern = 3;
-		return decimal.TryParse(value, NumberStyles.Currency, formatInfo, out decimal result)
+		return decimal.TryParse(valueToBeParsed, NumberStyles.Currency, formatInfo, out decimal result)
 			? result
 			: null;
 	}
