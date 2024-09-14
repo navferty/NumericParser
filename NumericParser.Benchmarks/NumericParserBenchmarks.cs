@@ -5,49 +5,27 @@ namespace NumericParser.Benchmarks;
 [MemoryDiagnoser, ShortRunJob]
 public class NumericParserBenchmarks
 {
-	private readonly string[] data;
-
-	public NumericParserBenchmarks()
-	{
-		var rand = new Random(15).Next(0, 1000).ToString();
-		data =
-		[
-			rand,
-			"000" + rand,
-			"123" + rand,
-			"000." + rand,
-			"123," + rand,
-			"1.000." + rand,
-			"1,123," + rand,
-			"1,000." + rand,
-			"1.123," + rand,
-			"12.34.56," + rand,
-			"12,34,56." + rand,
-			rand + "E5",
-
-		];
-	}
+	[Params(
+		"1",
+		"11",
+		"111",
+		"1111",
+		"11111",
+		"12,91",
+		"34.56",
+		"12.345.678,91",
+		"12,345,678.91",
+		"-1 000 000 . 321",
+		"1234567.89",
+		".123456789",
+		"123.456.789",
+		"15E3",
+		"-5.371E8")]
+	public string? Input { get; set; }
 
 	[Benchmark]
 	public decimal ParseDecimal()
 	{
-		var result = 0m;
-		foreach (var item in data)
-		{
-			result += item.ParseDecimal();
-		}
-		return result;
-	}
-
-	[Benchmark]
-	public decimal TryParseDecimal()
-	{
-		var result = 0m;
-		foreach (var item in data)
-		{
-			if (item.TryParseDecimal(out var parsed))
-				result += parsed.Value;
-		}
-		return result;
+		return Input.ParseDecimal();
 	}
 }
