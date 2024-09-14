@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.1;net8.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net8.0</TargetFrameworks>
     <LangVersion>latest</LangVersion>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
@@ -14,6 +14,10 @@
     <PackageDescription>Flexible parser for decimal values from string.</PackageDescription>
     <RepositoryUrl>https://github.com/navferty/NumericParser</RepositoryUrl>
   </PropertyGroup>
+
+  <ItemGroup Condition="$(TargetFramework)=='NETSTANDARD2.0'">
+    <PackageReference Include="System.Memory" Version="4.5.5" />
+  </ItemGroup>
 
   <ItemGroup>
     <None Include="../readme.md" Pack="true" PackagePath="/" />
