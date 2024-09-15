@@ -15,7 +15,7 @@ internal static class DecimalParserImpl
 		}
 
 		Span<char> value = stackalloc char[input.Length];
-		var copyResult = InputReader.CopyWithoutSpaces(input, value);
+		var copyResult = InputReader.ReadAsSpan(input, value);
 		if (copyResult.BytesWritten == -1)
 		{
 			return null;
@@ -25,7 +25,23 @@ internal static class DecimalParserImpl
 
 		if (copyResult.IsExponent)
 		{
-			return value.TryParseExponent();
+			return copyResult.DeterminedSeparator switch
+			{
+				'.' => value.TryParseExponent(Format.Dot),
+				',' => value.TryParseExponent(Format.Comma),
+				'\0' => value.TryParseExponent(),
+				_ => throw new InvalidOperationException("Unexpected separator character"),
+			};
+		}
+
+		if (copyResult.DeterminedSeparator == '.')
+		{
+			return value.TryParse(Format.Dot);
+		}
+
+		if (copyResult.DeterminedSeparator == ',')
+		{
+			return value.TryParse(Format.Comma);
 		}
 
 		if (copyResult.CommasCount > 0 && copyResult.DotsCount > 0)
@@ -62,14 +78,20 @@ internal static class DecimalParserImpl
 		return value.TryParse(Format.Dot);
 	}
 
-	private static decimal? TryParseExponent(this Span<char> value)
+	private static decimal? TryParseExponent(this Span<char> value, Format? format = null)
 	{
 #if NETSTANDARD2_0
 		var valueToBeParsed = value.ToString();
 #else
 		var valueToBeParsed = value;
 #endif
-		return decimal.TryParse(valueToBeParsed, NumberStyles.Float, CultureInfo.InvariantCulture, out decimal result)
+		var formatInfo = format.HasValue
+			? format.Value == Format.Comma
+				? CommaFormatInfo.Value
+				: DotFormatInfo.Value
+			: CultureInfo.InvariantCulture.NumberFormat;
+
+		return decimal.TryParse(valueToBeParsed, NumberStyles.Float, formatInfo, out decimal result)
 			? result
 			: null;
 	}
