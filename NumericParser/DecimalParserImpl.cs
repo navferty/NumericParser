@@ -7,7 +7,7 @@ internal static class DecimalParserImpl
 	private static readonly Lazy<NumberFormatInfo> CommaFormatInfo = new(CreateCommaFormat);
 	private static readonly Lazy<NumberFormatInfo> DotFormatInfo = new(CreateDotFormat);
 
-	public static decimal? ParseDecimal(this string? input)
+	public static decimal? ParseDecimal(this string? input, DecimalParserSettings? settings)
 	{
 		if (string.IsNullOrEmpty(input) || input!.Length > DecimalParser.MaximumInputLength)
 		{
@@ -63,16 +63,41 @@ internal static class DecimalParserImpl
 
 		if (copyResult.CommasCount > 0)
 		{
-			return copyResult.CommasCount == 1
-				? value.TryParse(input, Format.Comma)
-				: value.TryParse(input, Format.Dot);
+			if (copyResult.CommasCount == 1)
+			{
+				if (settings is not null
+					&& settings.PreferThousandsInAmbiguousCase
+					&& copyResult.LastSeparatorIndex == copyResult.BytesWritten - 4)
+				{
+					// ambiguous case like "123,456", should be 123456
+					return value.TryParse(input, Format.Dot);
+				}
+				else
+				{
+					return value.TryParse(input, Format.Comma);
+				}
+			}
+
+			return value.TryParse(input, Format.Dot);
 		}
 
 		if (copyResult.DotsCount > 0)
 		{
-			return copyResult.DotsCount == 1
-				? value.TryParse(input, Format.Dot)
-				: value.TryParse(input, Format.Comma);
+			if (copyResult.DotsCount == 1)
+			{
+				if (settings is not null
+					&& settings.PreferThousandsInAmbiguousCase
+					&& copyResult.LastSeparatorIndex == copyResult.BytesWritten - 4)
+				{
+					return value.TryParse(input, Format.Comma);
+				}
+				else
+				{
+					return value.TryParse(input, Format.Dot);
+				}
+			}
+
+			return value.TryParse(input, Format.Comma);
 		}
 
 		return value.TryParse(input, Format.Dot);

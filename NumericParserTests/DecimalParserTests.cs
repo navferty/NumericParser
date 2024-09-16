@@ -27,6 +27,18 @@ public class NumericParserTests
 	}
 
 	[Theory]
+	[MemberData(nameof(GetValidDataWithThousands))]
+	public void ParseValidDecimalWithPreferThousands(string sourceValue, decimal targetValue)
+	{
+		var options = new DecimalParserSettings { PreferThousandsInAmbiguousCase =  true };
+
+		var success = sourceValue.TryParseDecimal(out var result, options);
+
+		Assert.True(success);
+		Assert.Equal(targetValue, result);
+	}
+
+	[Theory]
 	[MemberData(nameof(GetInvalidData))]
 	public void ParseInvalidDecimal(string? sourceValue)
 	{
@@ -34,6 +46,26 @@ public class NumericParserTests
 
 		Assert.False(success);
 	}
+
+	public static TheoryData<string, decimal> GetValidDataWithThousands() =>
+		new()
+		{
+			{ "1,000", 1000m },
+			{ "1,234", 1234m },
+			{ "1.000", 1000m },
+			{ "1.234", 1234m },
+
+			{ "321,000", 321000m },
+			{ "123,234", 123234m },
+			{ "1123.000", 1123000m },
+			{ "-2321.234", -2321234m },
+
+			{ "1,111,000", 1111000m },
+			{ "-2,221,234", -2221234m },
+
+			{ "1.0001", 1.0001m },
+			{ "1.23", 1.23m },
+		};
 
 	public static TheoryData<string, decimal> GetValidData()
 	{
@@ -49,6 +81,8 @@ public class NumericParserTests
 			{ ".123", 0.123m },
 			{ "10.000.000", 10000000m },
 			{ "10.000,12", 10000.12m },
+			{ "10.001", 10.001m },
+			{ "100,123", 100.123m },
 			{ "12,345.12", 12345.12m },
 			{ "12,345,000", 12345000m },
 			{ "12,34,56,789.12", 123456789.12m }, // indian system (group by 2 digits)
