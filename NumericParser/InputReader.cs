@@ -8,36 +8,36 @@ internal static class InputReader
 
 		for (int i = 0; i < source.Length; i++)
 		{
-			var c = source[i];
+			var currentChar = source[i];
 
-			if (char.IsWhiteSpace(c))
+			if (char.IsWhiteSpace(currentChar))
 			{
 				continue;
 			}
-			else if (char.IsDigit(c))
+			else if (char.IsDigit(currentChar))
 			{
 				state.CurrentDigitGroupCount++;
-				destination[state.BytesWritten++] = c;
+				destination[state.BytesWritten++] = currentChar;
 			}
-			else if (c == '+' || c == '-')
+			else if (currentChar == '+' || currentChar == '-')
 			{
-				var processed = ProcessSign(ref destination, ref state, c);
+				var processed = ProcessSign(ref destination, ref state, currentChar);
 				if (!processed)
 					return CopyResult.Empty;
 			}
-			else if (c == '.')
+			else if (currentChar == '.')
 			{
 				var processed = ProcessDot(ref destination, ref state);
 				if (!processed)
 					return CopyResult.Empty;
 			}
-			else if (c == ',')
+			else if (currentChar == ',')
 			{
 				var processed = ProcessComma(ref destination, ref state);
 				if (!processed)
 					return CopyResult.Empty;
 			}
-			else if (c == 'e' || c == 'E')
+			else if (currentChar == 'e' || currentChar == 'E')
 			{
 				var processed = ProcessExponent(ref destination, ref state);
 				if (!processed)
