@@ -14,13 +14,21 @@ jobs:
     steps:
     - name: Git checkout
       uses: actions/checkout@v4
+
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 8.0.x
+
+    # Avoid building unused project targeting old framework
+    - name: Remove .NET Framework dependency
+      run: dotnet sln remove ./NumericParser.Benchmarks.NetFramework481/NumericParser.Benchmarks.NetFramework481.csproj
+
     - name: Restore dependencies
       run: dotnet restore
+
     - name: Build
       run: dotnet build --no-restore
+
     - name: Test
       run: dotnet test --no-build --verbosity normal

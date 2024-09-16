@@ -55,6 +55,7 @@ internal static class InputReader
 			dots: state.DotsCount,
 			commas: state.CommasCount,
 			lastSeparator: state.LastSeparator,
+			lastSeparatorIndex: state.LastSeparatorIndex,
 			determinedSeparator: state.DeterminedDecimalSeparator);
 
 	}
@@ -190,7 +191,7 @@ internal static class InputReader
 
 internal readonly record struct CopyResult
 {
-	public static CopyResult Empty = new(-1, false, 0, 0, '\0', '\0');
+	public static CopyResult Empty = new(-1, false, 0, 0, '\0', 0, '\0');
 
 	public CopyResult(
 		int bytesWritten,
@@ -198,6 +199,7 @@ internal readonly record struct CopyResult
 		int dots,
 		int commas,
 		char lastSeparator,
+		int lastSeparatorIndex,
 		char determinedSeparator)
 	{
 		BytesWritten = bytesWritten;
@@ -205,6 +207,7 @@ internal readonly record struct CopyResult
 		DotsCount = dots;
 		CommasCount = commas;
 		LastSeparator = lastSeparator;
+		LastSeparatorIndex = lastSeparatorIndex;
 		DeterminedSeparator = determinedSeparator;
 	}
 
@@ -213,5 +216,6 @@ internal readonly record struct CopyResult
 	public int DotsCount { get; }
 	public int CommasCount { get; }
 	public char LastSeparator { get; }
+	public int LastSeparatorIndex { get; }
 	public char DeterminedSeparator { get; }
 }
