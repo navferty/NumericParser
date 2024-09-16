@@ -27,21 +27,21 @@ internal static class DecimalParserImpl
 		{
 			return copyResult.DeterminedSeparator switch
 			{
-				'.' => value.TryParseExponent(Format.Dot),
-				',' => value.TryParseExponent(Format.Comma),
-				'\0' => value.TryParseExponent(),
+				'.' => value.TryParseExponent(input, Format.Dot),
+				',' => value.TryParseExponent(input, Format.Comma),
+				'\0' => value.TryParseExponent(input),
 				_ => throw new InvalidOperationException("Unexpected separator character"),
 			};
 		}
 
 		if (copyResult.DeterminedSeparator == '.')
 		{
-			return value.TryParse(Format.Dot);
+			return value.TryParse(input, Format.Dot);
 		}
 
 		if (copyResult.DeterminedSeparator == ',')
 		{
-			return value.TryParse(Format.Comma);
+			return value.TryParse(input, Format.Comma);
 		}
 
 		if (copyResult.CommasCount > 0 && copyResult.DotsCount > 0)
@@ -50,12 +50,12 @@ internal static class DecimalParserImpl
 
 			if (lastSeparator == '.' && copyResult.DotsCount == 1)
 			{
-				return value.TryParse(Format.Dot);
+				return value.TryParse(input, Format.Dot);
 			}
 
 			if (lastSeparator == ',' && copyResult.CommasCount == 1)
 			{
-				return value.TryParse(Format.Comma);
+				return value.TryParse(input, Format.Comma);
 			}
 
 			return null;
@@ -64,24 +64,27 @@ internal static class DecimalParserImpl
 		if (copyResult.CommasCount > 0)
 		{
 			return copyResult.CommasCount == 1
-				? value.TryParse(Format.Comma)
-				: value.TryParse(Format.Dot);
+				? value.TryParse(input, Format.Comma)
+				: value.TryParse(input, Format.Dot);
 		}
 
 		if (copyResult.DotsCount > 0)
 		{
 			return copyResult.DotsCount == 1
-				? value.TryParse(Format.Dot)
-				: value.TryParse(Format.Comma);
+				? value.TryParse(input, Format.Dot)
+				: value.TryParse(input, Format.Comma);
 		}
 
-		return value.TryParse(Format.Dot);
+		return value.TryParse(input, Format.Dot);
 	}
 
-	private static decimal? TryParseExponent(this Span<char> value, Format? format = null)
+	private static decimal? TryParseExponent(this Span<char> value, string originalValue, Format? format = null)
 	{
 #if NETSTANDARD2_0
-		var valueToBeParsed = value.ToString();
+		// Avoid new string allocation if possible
+		var valueToBeParsed = value.Length == originalValue.Length
+			? originalValue
+			: value.ToString();
 #else
 		var valueToBeParsed = value;
 #endif
@@ -96,10 +99,12 @@ internal static class DecimalParserImpl
 			: null;
 	}
 
-	private static decimal? TryParse(this Span<char> value, Format info)
+	private static decimal? TryParse(this Span<char> value, string originalValue, Format info)
 	{
 #if NETSTANDARD2_0
-		var valueToBeParsed = value.ToString();
+		var valueToBeParsed = value.Length == originalValue.Length
+			? originalValue
+			: value.ToString();
 #else
 		var valueToBeParsed = value;
 #endif
