@@ -15,7 +15,7 @@ internal static class DecimalParserImpl
 		}
 
 		Span<char> value = stackalloc char[input.Length];
-		var copyResult = InputReader.CopyWithoutSpaces(input, value);
+		var copyResult = InputReader.ReadAsSpan(input, value);
 		if (copyResult.BytesWritten == -1)
 		{
 			return null;
@@ -25,7 +25,23 @@ internal static class DecimalParserImpl
 
 		if (copyResult.IsExponent)
 		{
-			return value.TryParseExponent();
+			return copyResult.DeterminedSeparator switch
+			{
+				'.' => value.TryParseExponent(input, Format.Dot),
+				',' => value.TryParseExponent(input, Format.Comma),
+				'\0' => value.TryParseExponent(input),
+				_ => throw new InvalidOperationException("Unexpected separator character"),
+			};
+		}
+
+		if (copyResult.DeterminedSeparator == '.')
+		{
+			return value.TryParse(input, Format.Dot);
+		}
+
+		if (copyResult.DeterminedSeparator == ',')
+		{
+			return value.TryParse(input, Format.Comma);
 		}
 
 		if (copyResult.CommasCount > 0 && copyResult.DotsCount > 0)
@@ -34,12 +50,12 @@ internal static class DecimalParserImpl
 
 			if (lastSeparator == '.' && copyResult.DotsCount == 1)
 			{
-				return value.TryParse(Format.Dot);
+				return value.TryParse(input, Format.Dot);
 			}
 
 			if (lastSeparator == ',' && copyResult.CommasCount == 1)
 			{
-				return value.TryParse(Format.Comma);
+				return value.TryParse(input, Format.Comma);
 			}
 
 			return null;
@@ -48,36 +64,47 @@ internal static class DecimalParserImpl
 		if (copyResult.CommasCount > 0)
 		{
 			return copyResult.CommasCount == 1
-				? value.TryParse(Format.Comma)
-				: value.TryParse(Format.Dot);
+				? value.TryParse(input, Format.Comma)
+				: value.TryParse(input, Format.Dot);
 		}
 
 		if (copyResult.DotsCount > 0)
 		{
 			return copyResult.DotsCount == 1
-				? value.TryParse(Format.Dot)
-				: value.TryParse(Format.Comma);
+				? value.TryParse(input, Format.Dot)
+				: value.TryParse(input, Format.Comma);
 		}
 
-		return value.TryParse(Format.Dot);
+		return value.TryParse(input, Format.Dot);
 	}
 
-	private static decimal? TryParseExponent(this Span<char> value)
+	private static decimal? TryParseExponent(this Span<char> value, string originalValue, Format? format = null)
 	{
 #if NETSTANDARD2_0
-		var valueToBeParsed = value.ToString();
+		// Avoid new string allocation if possible
+		var valueToBeParsed = value.Length == originalValue.Length
+			? originalValue
+			: value.ToString();
 #else
 		var valueToBeParsed = value;
 #endif
-		return decimal.TryParse(valueToBeParsed, NumberStyles.Float, CultureInfo.InvariantCulture, out decimal result)
+		var formatInfo = format.HasValue
+			? format.Value == Format.Comma
+				? CommaFormatInfo.Value
+				: DotFormatInfo.Value
+			: CultureInfo.InvariantCulture.NumberFormat;
+
+		return decimal.TryParse(valueToBeParsed, NumberStyles.Float, formatInfo, out decimal result)
 			? result
 			: null;
 	}
 
-	private static decimal? TryParse(this Span<char> value, Format info)
+	private static decimal? TryParse(this Span<char> value, string originalValue, Format info)
 	{
 #if NETSTANDARD2_0
-		var valueToBeParsed = value.ToString();
+		var valueToBeParsed = value.Length == originalValue.Length
+			? originalValue
+			: value.ToString();
 #else
 		var valueToBeParsed = value;
 #endif
