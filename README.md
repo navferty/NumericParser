@@ -5,32 +5,38 @@ Simple library to parse numeric values, stored in strings, to decimal values wit
 
 Handles with different formats like "1,111.11" or "2.222,22"
 
-## NuGet package
+## NuGet package installation
 
-You can download NumericParser from [nuget.org](https://www.nuget.org/packages/NumericParser/) as NuGet package.
+You can download NumericParser from [nuget.org](https://www.nuget.org/packages/NumericParser/) as NuGet package,
+or simply run the following command in the Package Manager Console:
+
+```powershell
+NuGet\Install-Package NumericParser
+```
 
 ## Usage example
 
 ```csharp
 using NumericParser;
 
-namespace Test;
+var oldvalue = "1,234,567.8";
+var newValue = oldvalue.ParseDecimal();
+Console.WriteLine($"Parsed value: {newValue}");
 
-class Test
+var oldvalue1 = "1.234.567,8";
+if (oldvalue1.TryParseDecimal(out var parsed))
 {
-  void ParseDemo()
-  {
-    var oldvalue = "1,234,567.8";
-    var newValue = oldvalue.ParseDecimal();
-    Console.WriteLine($"Parsed value: {newValue}");
-
-    var oldvalue1 = "1.234.567,8";
-    if (oldvalue1.TryParseDecimal(out var parsed))
-    {
-      Console.WriteLine($"Parsed value: {parsed}");
-    }
-  }
+  Console.WriteLine($"Parsed value: {parsed}");
 }
+```
+
+## Additional settings
+
+There are some additional settings that can be used to customize the parsing process. Currently, the following settings are available:
+
+* `DecimalParserSettings.PreferThousandsInAmbiguousCases` - if set to true, the parser will prefer the thousands separator in ambiguous cases. For example, if the input is "1,234" or "1.234", the parser will treat it as 1234m (and not as 1.234m) if this setting is set to true. By default, this setting is set to false.
+
+```csharp
 ```
 
 ## Examples
@@ -49,10 +55,20 @@ class Test
 |"10.000,12"	|		10000.12|
 |"12,345.12"	|		12345.12|
 |"12,345,000"	|		12345000|
-|"1E6"			|		1000000	|
 |"1.2E3"		|		1200	|
-|"-1.3E-5"		|		0.000013|
+|"-1.3e-5"		|		0.000013|
 |"no value"		|		null	|
+|null			|		null	|
+| "10.001" | 10.001m \* |
+| "100,123" | 100.123m \* |
+| "12,345.12" | 12345.12m |
+| "12,345,000" | 12345000m |
+| "12,34,56,789.12" | 123456789.12m |
+| "12.34.56.789,12" | 123456789.12m |
+| "12,3456,7890,2345.67" | 12345678902345.67m |
+| "12.3456.7890.2345,67" | 12345678902345.67m |
+
+\*Depends on [additional settings](#Additional-settings).
 
 ## Benchmarks
 
