@@ -38,6 +38,13 @@ There are some additional settings that can be used to customize the parsing pro
 * `DecimalParserSettings.PreferThousandsInAmbiguousCases` - if set to true, the parser will prefer the thousands separator in ambiguous cases. For example, if the input is "1,234" or "1.234", the parser will treat it as 1234m (and not as 1.234m) if this setting is set to true. By default, this setting is set to false.
 
 ```csharp
+using NumericParser;
+
+var settings = new DecimalParserSettings { PreferThousandsInAmbiguousCases = true };
+
+var oldvalue = "1,234";
+var newValue = oldvalue.ParseDecimal(settings);
+Console.WriteLine($"Parsed value: {newValue}"); // Parsed value: 1234m
 ```
 
 ## Examples
