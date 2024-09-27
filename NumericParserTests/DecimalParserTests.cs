@@ -3,10 +3,10 @@ using Xunit;
 
 namespace NumericParserTests;
 
-public class NumericParserTests
+public class DecimalParserTests
 {
 	[Fact]
-	public void ParseSimpleDecimal()
+	public void ParseSimpleDecimal_ShouldReturnTrueAndCorrectValue()
 	{
 		var sourceValue = "1.234.567,89";
 
@@ -18,7 +18,7 @@ public class NumericParserTests
 
 	[Theory]
 	[MemberData(nameof(GetValidData))]
-	public void ParseValidDecimal(string sourceValue, decimal targetValue)
+	public void ParseValidDecimal_ShouldReturnTrueAndCorrectValue(string sourceValue, decimal targetValue)
 	{
 		var success = sourceValue.TryParseDecimal(out var result);
 
@@ -28,9 +28,9 @@ public class NumericParserTests
 
 	[Theory]
 	[MemberData(nameof(GetValidDataWithThousands))]
-	public void ParseValidDecimalWithPreferThousands(string sourceValue, decimal targetValue)
+	public void ParseValidDecimalWithPreferThousands_ShouldReturnTrueAndCorrectValue(string sourceValue, decimal targetValue)
 	{
-		var options = new DecimalParserSettings { PreferThousandsInAmbiguousCase =  true };
+		var options = new DecimalParserSettings { PreferThousandsInAmbiguousCase = true };
 
 		var success = sourceValue.TryParseDecimal(out var result, options);
 
@@ -40,11 +40,53 @@ public class NumericParserTests
 
 	[Theory]
 	[MemberData(nameof(GetInvalidData))]
-	public void ParseInvalidDecimal(string? sourceValue)
+	public void ParseInvalidDecimal_ShouldReturnFalse(string? sourceValue)
 	{
 		var success = sourceValue.TryParseDecimal(out var result);
 
 		Assert.False(success);
+		Assert.Null(result);
+	}
+
+	[Fact]
+	public void TryParseDecimal_MaximumLengthExceeded_ShouldReturnFalse()
+	{
+		var sourceValue = new string('1', DecimalParser.MaximumInputLength + 1);
+
+		var success = sourceValue.TryParseDecimal(out var result);
+
+		Assert.False(success);
+		Assert.Null(result);
+	}
+
+	[Fact]
+	public void ParseDecimal_InputExceedsMaximumLength_ThrowsArgumentException()
+	{
+		var input = new string('1', DecimalParser.MaximumInputLength + 1);
+
+		Assert.Throws<ArgumentException>(() => DecimalParser.ParseDecimal(input));
+	}
+
+	[Fact]
+	public void ParseDecimal_MinimumValue_ShouldReturnTrueAndCorrectValue()
+	{
+		var sourceValue = decimal.MinValue.ToString();
+
+		var success = sourceValue.TryParseDecimal(out var result);
+
+		Assert.True(success);
+		Assert.Equal(decimal.MinValue, result);
+	}
+
+	[Fact]
+	public void ParseDecimal_MaximumValue_ShouldReturnTrueAndCorrectValue()
+	{
+		var sourceValue = decimal.MaxValue.ToString();
+
+		var success = sourceValue.TryParseDecimal(out var result);
+
+		Assert.True(success);
+		Assert.Equal(decimal.MaxValue, result);
 	}
 
 	public static TheoryData<string, decimal> GetValidDataWithThousands() =>
@@ -54,6 +96,11 @@ public class NumericParserTests
 			{ "1,234", 1234m },
 			{ "1.000", 1000m },
 			{ "1.234", 1234m },
+
+			{ "1.234,56", 1234.56m },
+			{ "1,234.56", 1234.56m },
+			{ "123,456", 123456m },
+			{ "123.456", 123456m },
 
 			{ "321,000", 321000m },
 			{ "123,234", 123234m },
@@ -76,6 +123,13 @@ public class NumericParserTests
 			{ "1.1", 1.1m },
 			{ "1,1", 1.1m },
 			{ "1 000", 1000m },
+			{ "123.45", 123.45m },
+			{ "123,45", 123.45m },
+			{ "1,234.56", 1234.56m },
+			{ "1.234,56", 1234.56m },
+			{ "123456", 123456m },
+			{ "123,456.78", 123456.78m },
+			{ "123.456,78", 123456.78m },
 			{ "12  00 00 . 12", 120000.12m },
 			{ "0.1", 0.1m },
 			{ ".123", 0.123m },
@@ -109,6 +163,8 @@ public class NumericParserTests
 			{ null },
 			{ "" },
 			{ "no value" },
+			{ "1,234.56.78" },
+			{ "1.234,56.78" },
 			{ "00000011111111222222222X" },
 			{ "1E2E3" },
 			{ "1.2eE3" },
