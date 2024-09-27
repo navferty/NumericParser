@@ -1,12 +1,12 @@
 # NumericParser
 
-Simple library for parsing numeric values, stored in strings, to decimal values with precision.
+Simple library for flexible parsing numeric values, stored in strings, to decimal values with precision.
 
 Handles with different formats like "1,111.11" or "2.222,22".
 
-[![NuGet](https://img.shields.io/nuget/v/NumericParser.svg)](https://www.nuget.org/packages/NumericParser/)
-
 ## NuGet package installation
+
+[![NuGet](https://img.shields.io/nuget/v/NumericParser.svg)](https://www.nuget.org/packages/NumericParser/)
 
 You can download NumericParser from [nuget.org](https://www.nuget.org/packages/NumericParser/) as NuGet package,
 or simply run the following command in the Package Manager Console:
