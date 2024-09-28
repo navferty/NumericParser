@@ -12,7 +12,7 @@ env:
   AZURE_APIM_SERVICENAME: NumericParserWebapi
   AZURE_APIM_API_ID: NumericParserWeb
   AZURE_APIM_APPSERVICEURL: https://numericparserweb20240928144547.azurewebsites.net
-  SWASHBUCLE_ASPNET_CORE_CLI_PACKAGE_VERSION: 5.6.3
+  SWASHBUCLE_ASPNET_CORE_CLI_PACKAGE_VERSION: 6.8.0
   SWASHBUCKLE_DOTNET_CORE_VERSION: 3.1.x
   API_IMPORT_SPECIFICATION_PATH: NumericParser.Web/publish/swagger.json
   API_IMPORT_DLL: NumericParser.Web/bin/Release/net8.0/NumericParser.Web.dll
@@ -24,28 +24,38 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - name: Git checkout
+      uses: actions/checkout@v4
+
     - name: Setup .NET SDK
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: ${{ env.DOTNET_CORE_VERSION }}
+
     - name: Setup SwashBuckle .NET Core
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: ${{ env.SWASHBUCKLE_DOTNET_CORE_VERSION }}
+
     - name: Restore
       run: dotnet restore ${{ env.WORKING_DIRECTORY }}
+
     - name: Build
       run: dotnet build ${{ env.WORKING_DIRECTORY }} --configuration ${{ env.CONFIGURATION }} --no-restore
+
     - name: Test
       run: dotnet test ${{ env.WORKING_DIRECTORY }} --no-build
+
     - name: Publish
       run: dotnet publish ${{ env.WORKING_DIRECTORY }} --configuration ${{ env.CONFIGURATION }} --no-build --output ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
-    # - name: Install Swashbuckle CLI .NET Global Tool
-    #   run: dotnet tool install --global Swashbuckle.AspNetCore.Cli --version ${{ env.SWASHBUCLE_ASPNET_CORE_CLI_PACKAGE_VERSION }}
-    #   working-directory: ${{ env.WORKING_DIRECTORY }}
-    # - name: Generate Open API Specification Document
-    #   run: swagger tofile --output "${{ env.API_IMPORT_SPECIFICATION_PATH }}" "${{ env.API_IMPORT_DLL }}" "${{ env.API_IMPORT_VERSION }}"
+
+    - name: Install Swashbuckle CLI .NET Global Tool
+      run: dotnet tool install --global Swashbuckle.AspNetCore.Cli --version ${{ env.SWASHBUCLE_ASPNET_CORE_CLI_PACKAGE_VERSION }}
+      working-directory: ${{ env.WORKING_DIRECTORY }}
+
+    - name: Generate Open API Specification Document
+      run: swagger tofile --output "${{ env.API_IMPORT_SPECIFICATION_PATH }}" "${{ env.API_IMPORT_DLL }}" "${{ env.API_IMPORT_VERSION }}"
+
     - name: Publish Artifacts
       uses: actions/upload-artifact@v3
       with:
@@ -72,7 +82,6 @@ jobs:
     - name: Azure Login
       uses: azure/login@v1
       with:
-        # tenant-id: ${{ secrets.AZURE_TENANT_ID }}
         creds: ${{ secrets.NumericParserWebapi_SPN }}
 
     - name: Import API into Azure API Management
