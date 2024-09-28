@@ -36,10 +36,16 @@ public static class DecimalParser
 	/// <param name="value">Input string. Maximum lenght is 1000 symbols.</param>
 	/// <param name="settings">Additional settings, see <see cref="DecimalParserSettings"/>.</param>
 	/// <returns>Decimal value.</returns>
-	/// <exception cref="ArgumentException">Throws if value can not be parsed to decimal.</exception>
+	/// <exception cref="ArgumentNullException">Throws if value is null.</exception>
+	/// <exception cref="FormatException">Throws if value can not be parsed to decimal.</exception>
 	public static decimal ParseDecimal(this string? value, DecimalParserSettings? settings = null)
 	{
+		if (value is null)
+		{
+			throw new ArgumentNullException(nameof(value));
+		}
+
 		return DecimalParserImpl.ParseDecimal(value, settings)
-			?? throw new ArgumentException("Failed to parse value to decimal");
+			?? throw new FormatException("Input string was not in a correct format.");
 	}
 }
