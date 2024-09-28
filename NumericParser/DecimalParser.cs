@@ -46,6 +46,6 @@ public static class DecimalParser
 		}
 
 		return DecimalParserImpl.ParseDecimal(value, settings)
-			?? throw new FormatException("Failed to parse value to decimal");
+			?? throw new FormatException("Input string was not in a correct format.");
 	}
 }

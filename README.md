@@ -1,14 +1,14 @@
 # NumericParser
 
-Simple library for flexible parsing numeric values, stored in strings, to decimal values with precision.
+A simple library for flexible parsing numeric values stored in strings to decimal values with precision.
 
-Handles with different formats like "1,111.11" or "2.222,22".
+Handles different formats like "1,111.11" or "2.222,22".
 
 ## NuGet package installation
 
 [![NuGet](https://img.shields.io/nuget/v/NumericParser.svg)](https://www.nuget.org/packages/NumericParser/)
 
-You can download NumericParser from [nuget.org](https://www.nuget.org/packages/NumericParser/) as NuGet package,
+You can download NumericParser from [nuget.org](https://www.nuget.org/packages/NumericParser/) as a NuGet package,
 or simply run the following command in the Package Manager Console:
 
 ```powershell
@@ -20,12 +20,12 @@ NuGet\Install-Package NumericParser
 ```csharp
 using NumericParser;
 
-var oldvalue = "1,234,567.8";
-var newValue = oldvalue.ParseDecimal();
+var oldValue = "1,234,567.8";
+var newValue = oldValue.ParseDecimal();
 Console.WriteLine($"Parsed value: {newValue}");
 
-var oldvalue1 = "1.234.567,8";
-if (oldvalue1.TryParseDecimal(out var parsed))
+var oldValue1 = "1.234.567,8";
+if (oldValue1.TryParseDecimal(out var parsed))
 {
   Console.WriteLine($"Parsed value: {parsed}");
 }
@@ -42,10 +42,19 @@ using NumericParser;
 
 var settings = new DecimalParserSettings { PreferThousandsInAmbiguousCases = true };
 
-var oldvalue = "1,234";
-var newValue = oldvalue.ParseDecimal(settings);
+var oldValue = "1,234";
+var newValue = oldValue.ParseDecimal(settings);
 Console.WriteLine($"Parsed value: {newValue}"); // Parsed value: 1234m
 ```
+
+## Exceptions
+
+The `TryParseDecimal` method does not throw any exceptions.
+If the input value is not a valid decimal number, the method returns `false` and the out parameter is set to `null`.
+
+The `ParseDecimal` method throws an exception if the input value cannot be parsed into a decimal number:
+* In case of null input, the exception is of type `ArgumentNullException` and contains the message "Value cannot be null. (Parameter 'value')".
+* In other cases, such as an empty string, unexpected characters, or overflow, the exception is of type `FormatException` and contains the message "Input string was not in a correct format.".
 
 ## Examples
 
