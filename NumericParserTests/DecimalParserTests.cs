@@ -60,11 +60,27 @@ public class DecimalParserTests
 	}
 
 	[Fact]
-	public void ParseDecimal_InputExceedsMaximumLength_ThrowsArgumentException()
+	public void ParseDecimal_InputExceedsMaximumLength_ThrowsFormatException()
 	{
 		var input = new string('1', DecimalParser.MaximumInputLength + 1);
 
-		Assert.Throws<ArgumentException>(() => DecimalParser.ParseDecimal(input));
+		Assert.Throws<FormatException>(() => DecimalParser.ParseDecimal(input));
+	}
+
+	[Fact]
+	public void ParseDecimal_InputIsNull_ThrowsArgumentException()
+	{
+		var input = (string?)null;
+
+		Assert.Throws<ArgumentNullException>(() => DecimalParser.ParseDecimal(input));
+	}
+
+	[Fact]
+	public void ParseDecimal_InputIsInvalid_ThrowsFormatException()
+	{
+		var input = "invalid input";
+
+		Assert.Throws<FormatException>(() => DecimalParser.ParseDecimal(input));
 	}
 
 	[Fact]
