@@ -16,7 +16,7 @@ public class ParserController : ControllerBase
 	[HttpGet("parse")]
 	public ParseResult ParseSingleValue([FromQuery] string query, [FromQuery] bool preferThousands)
 	{
-		var settings = preferThousands ? preferThousandsSettings : DecimalParserSettings.Default;
+		var settings = preferThousands ? preferThousandsSettings : new DecimalParserSettings(); // use .Default;
 		return ProcessQuery(query, settings);
 	}
 
@@ -31,7 +31,7 @@ public class ParserController : ControllerBase
 
 		var settings = query.PreferThousands
 			? preferThousandsSettings
-			: DecimalParserSettings.Default;
+			: new DecimalParserSettings(); // .Default;
 
 		return query.Source
 			.Select(q => ProcessQuery(q, settings))
