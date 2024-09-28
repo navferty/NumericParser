@@ -72,7 +72,7 @@ jobs:
     - name: Azure Login
       uses: azure/login@v1
       with:
-        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        # tenant-id: ${{ secrets.AZURE_TENANT_ID }}
         creds: ${{ secrets.NumericParserWebapi_SPN }}
 
     - name: Import API into Azure API Management
