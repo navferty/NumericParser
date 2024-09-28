@@ -3,6 +3,7 @@ on:
   push:
     branches:
     - master
+    - test-deploy
 env:
   AZURE_WEBAPP_NAME: NumericParserWeb20240928144547
   AZURE_WEBAPP_PACKAGE_PATH: NumericParser.Web/publish
