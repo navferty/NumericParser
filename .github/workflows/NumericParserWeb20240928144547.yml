@@ -1,5 +1,6 @@
 name: Build and deploy .NET app to Azure Web App
 on:
+  workflow_dispatch:
   push:
     branches:
     - master
