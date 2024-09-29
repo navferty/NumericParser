@@ -8,10 +8,10 @@ public class ParserController : ControllerBase
 {
 	private const int MaxBatchSize = 10_000;
 
-	private const string InputTooLongError = "Input too long";
-	private const string InvalidInputError = "Invalid input";
-
-	private readonly DecimalParserSettings preferThousandsSettings = new() { PreferThousandsInAmbiguousCase = true };
+	private readonly DecimalParserSettings preferThousandsSettings = new()
+	{
+		PreferThousandsInAmbiguousCase = true,
+	};
 
 	/// <summary>
 	/// Parse single value from query string.
@@ -54,7 +54,16 @@ public class ParserController : ControllerBase
 			return Array.Empty<ParseResult>();
 
 		if (query.Source.Count > MaxBatchSize)
-			return BadRequest($"Batch size too large. Max is {MaxBatchSize}");
+		{
+			var problemDetails = new ProblemDetails
+			{
+				Status = StatusCodes.Status400BadRequest,
+				Title = "Batch size too large",
+				Detail = $"The maximum batch size is {MaxBatchSize}.",
+				Instance = HttpContext.Request.Path
+			};
+			return BadRequest(problemDetails);
+		}
 
 		var settings = query.PreferThousands ?? false
 			? preferThousandsSettings
@@ -67,6 +76,9 @@ public class ParserController : ControllerBase
 
 	private static ParseResult ProcessQuery(string query, DecimalParserSettings settings)
 	{
+		const string InputTooLongError = "Input too long";
+		const string InvalidInputError = "Invalid input";
+
 		if (query.Length > DecimalParser.MaximumInputLength)
 			return new ParseResult { Source = query, Error = InputTooLongError };
 
