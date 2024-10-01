@@ -1,27 +1,16 @@
-using System.Text.Json;
-using System.Text.Json.Serialization;
+using NumericParser.Web;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
 builder.Services.AddControllers()
-	.AddJsonOptions(static options =>
-	{
+	.AddJsonOptions(static options => options.ConfigureJsonOptions());
 
-		options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
-		options.JsonSerializerOptions.AllowTrailingCommas = true;
-		options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
-		options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-		options.JsonSerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.CamelCase;
-		options.JsonSerializerOptions.ReadCommentHandling = JsonCommentHandling.Skip;
-	});
+builder.Services.AddRazorPages();
 
 builder.Services.AddProblemDetails();
 
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwagger();
 
 var app = builder.Build();
 
@@ -30,8 +19,11 @@ app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 
+app.UseStaticFiles();
+
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapRazorPages();
 
 app.Run();

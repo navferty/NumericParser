@@ -1,8 +1,10 @@
 # NumericParser
 
-A simple library for flexible parsing numeric values stored in strings to decimal values with precision.
+A simple .NET library for flexible parsing numeric values stored in strings to decimal values with precision.
 
 Handles different formats like "1,111.11" or "2.222,22".
+
+You can try logic of the library in the [online demo](https://decimalparser.net).
 
 ## NuGet package installation
 
@@ -35,7 +37,10 @@ if (oldValue1.TryParseDecimal(out var parsed))
 
 There are some additional settings that can be used to customize the parsing process. Currently, the following settings are available:
 
-* `DecimalParserSettings.PreferThousandsInAmbiguousCases` - if set to true, the parser will prefer the thousands separator in ambiguous cases. For example, if the input is "1,234" or "1.234", the parser will treat it as 1234m (and not as 1.234m) if this setting is set to true. By default, this setting is set to false.
+* `DecimalParserSettings.PreferThousandsInAmbiguousCases` - if set to true, the parser will prefer the thousands separator in ambiguous cases.
+  For example, if the input is "1,234" or "1.234", the parser will treat it as 1234m (and not as 1.234m) if this setting is set to true.
+  It affects only cases where the input value contains a single comma or a single dot, there are exactly three digits after the separator and not more than three digits before the separator.
+  By default, this setting is set to false.
 
 ```csharp
 using NumericParser;
@@ -51,6 +56,7 @@ Console.WriteLine($"Parsed value: {newValue}"); // Parsed value: 1234m
 
 The `TryParseDecimal` method does not throw any exceptions.
 If the input value is not a valid decimal number, the method returns `false` and the out parameter is set to `null`.
+When method returns true, the out parameter contains the parsed value and never is equal to null.
 
 The `ParseDecimal` method throws an exception if the input value cannot be parsed into a decimal number:
 * In case of null input, the exception is of type `ArgumentNullException` and contains the message "Value cannot be null. (Parameter 'value')".
